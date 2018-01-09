@@ -1,0 +1,48 @@
+<c3p0-config>  
+  <named-config name="pgsql">  
+    <property name="jdbcUrl">jdbc:postgresql://10.15.187.70/plproxy</property>          
+    <property name="driverClass">org.postgresql.Driver</property>         
+    <property name="user">postgres</property>         
+    <property name="password"></property>  
+    <property name="initialPoolSize">10</property>        
+    <property name="maxPoolSize">30</property>  
+    <property name="minPoolSize">10</property>  
+    <property name="acquireIncrement">5</property>  
+  </named-config>  
+     
+  <named-config name="oracle">  
+        <property name="driverClass">oracle.jdbc.driver.OracleDriver</property>  
+        <property name="jdbcUrl">jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS = (PROTOCOL = TCP)(HOST = 172.17.1.25)(PORT = 1521))(CONNECT_DATA =(SERVER =DEDICATED)(SID = orcl)))</property>  
+        <property name="user">goods_qa</property>  
+        <property name="password">GOODS_QA</property>  
+        <property name="acquireIncrement">5</property>  
+        <property name="initialPoolSize">10</property>  
+        <property name="minPoolSize">5</property>  
+        <property name="maxPoolSize">30</property>  
+        <property name="autoCommitOnClose">true</property>  
+    </named-config>  
+    
+    <named-config name="mysql">  
+        <property name="driverClass">com.mysql.jdbc.Driver</property>  
+        <property name="jdbcUrl">jdbc:mysql://10.15.172.108/userdata</property>  
+        <property name="user">userdata</property>  
+        <property name="password">43f59a7e5d</property>  
+           
+        <property name="acquireIncrement">5</property>  
+        <property name="initialPoolSize">10</property>  
+        <property name="minPoolSize">5</property>  
+        <property name="maxPoolSize">30</property>  
+    </named-config>  
+      
+    <named-config name="article_npro">  
+        <property name="driverClass">com.mysql.jdbc.Driver</property>  
+        <property name="jdbcUrl">jdbc:mysql://dbserver_article_npro/article_npro</property>  
+        <property name="user">pro_admin</property>  
+        <property name="password">3c2d4c41</property>  
+           
+        <property name="acquireIncrement">5</property>  
+        <property name="initialPoolSize">10</property>  
+        <property name="minPoolSize">5</property>  
+        <property name="maxPoolSize">30</property>  
+    </named-config>  
+</c3p0-config>  

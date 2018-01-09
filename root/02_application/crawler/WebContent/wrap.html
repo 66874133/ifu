@@ -1,0 +1,414 @@
+
+<HTML>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<form action="/service/htmlDiscoverService?" method="GET" id="from1">
+	<B>配置文件原始内容: </B> <br></br>
+	<textarea name="url地址" id="url" cols="115" rows="30"></textarea>
+	<br></br> <input type="button" value="↓生成D环境爬虫任务URL↓"
+		style="width: 220px;" onclick="javascript:toDurl()"> 
+		      <input
+		type="button" value="↓生成生产环境爬虫任务URL↓" style="width: 220px;"
+		onclick="javascript:toOurl()">
+		      <input
+		type="button" value="↓生成本地环境爬虫任务URL↓" style="width: 220px;"
+		onclick="javascript:toLocalurl()"><br></br>
+		       <input
+		type="button" value="↓生成上线LMS定时任务配置URL↓" style="width: 220px;"
+		onclick="javascript:toOTaskurl()">
+		
+		<input
+		type="button" value="↑解密爬虫URL配置↑" style="width: 220px;"
+		onclick="javascript:toConf()">
+		
+		<input
+		type="button" value="抓取URL测试样例" style="width: 220px;"
+		onclick="javascript:showTestUrl()">
+</form>
+
+<B> 加密后的URL地址: </B>
+<br></br>
+<textarea name="解析内容" id="content" cols="115" rows="10"></textarea>
+
+
+<script>
+
+function showTestUrl(){
+
+	
+	 var content = "http://120.25.228.198/crawler/service/generalCrawler?crawlerParams={%22callbackSvcCode%22:%22goodsInfoRecive%22,%22crawlerConf%22:%22PGNyYXdsZXIgc291cmNlPSIxIiBtYWxsPSIxNiIgbmFtZT0idGVzdCIgZW5jb2RlPSJVVEYtOCIgY2F0ZWdvcnk9Im5pbmUtbmluZSI+CiAgPHN0YXJ0ZXIgY2xhc3M9InNlZWRzLXN0YXJ0ZXIiPgogICAgPHNlZWRzPgogICAgICA8c3RyaW5nPmh0dHA6Ly9ndWFuZ2RpdS5jb20vPC9zdHJpbmc+CiAgICA8L3NlZWRzPgogIDwvc3RhcnRlcj4KICA8ZXh0cmFjdG9yPgogICAgPGV4dHJhY3Rvci1maWVsZCBmcm9tPSJzZWVkIiB0bz0ibGlzdCI+CiAgICAgIDxidWlsZGVyIGNsYXNzPSJ0ZW1wbGF0ZS1idWlsZGVyIiB0ZW1wbGF0ZT0iaHR0cDovL2d1YW5nZGl1LmNvbS9jaGVhcHMucGhwP3A9JDEiPgogICAgICAgIDxtdWx0aXBsZS1udW1iZXItYnVpbGRlciB0YXJnZXQ9IjEtMiIvPgogICAgICA8L2J1aWxkZXI+CiAgICA8L2V4dHJhY3Rvci1maWVsZD4KICAgCiAgICA8ZXh0cmFjdG9yLWZpZWxkIGZyb209Imxpc3QiIHRvPSJ0ZW1waXRlbV9kZXRhaWwiPgogICAgICA8YnVpbGRlciBjbGFzcz0icGF0aC1idWlsZGVyIiBwYXRoPSJkaXZbQGNsYXNzPSdjaGVhcHByaWNlJ10vYVtAY2xhc3M9J2NoZWFwZ290b2J1eSddL0BocmVmIiBwYXR0ZXJuPSIiIG9yZGVyPSJmYWxzZSIvPgogICAgICA8YWRqdXN0ZXIgY2xhc3M9InVybC1yZWxhdGl2ZS1wYXRoLWFkanVzdGVyIi8+CiAgICA8L2V4dHJhY3Rvci1maWVsZD4KICAgIDxleHRyYWN0b3ItZmllbGQgbmFtZT0idXJsIiBmcm9tPSJsaXN0IiB0bz0idGVtcGl0ZW1fZGV0YWlsIj4KICAgICAgPGJ1aWxkZXIgY2xhc3M9InBhdGgtYnVpbGRlciIgcGF0aD0iZGl2W0BjbGFzcz0nY2hlYXBwcmljZSddL2FbQGNsYXNzPSdjaGVhcHByaWNld29yZCddL0BocmVmIiBwYXR0ZXJuPSIiIG9yZGVyPSJmYWxzZSIvPgogICAgPC9leHRyYWN0b3ItZmllbGQ+CiAgICA8ZXh0cmFjdG9yLWZpZWxkIG5hbWU9Im5hbWUiIGZyb209Imxpc3QiIHRvPSJ0ZW1waXRlbV9kZXRhaWwiPgogICAgICA8YnVpbGRlciBjbGFzcz0icGF0aC1idWlsZGVyIiBwYXRoPSJkaXZbQGNsYXNzPSdjaGVhcHRpdGxlJ10vc3BhbltAY2xhc3M9J2NoZWFwdGl0bGV3b3JkJ10iIG9yZGVyPSJmYWxzZSIvPgogICAgPC9leHRyYWN0b3ItZmllbGQ+CiAgICAKICAgIDxleHRyYWN0b3ItZmllbGQgZnJvbT0idGVtcGl0ZW1fZGV0YWlsIiB0bz0idGVtcGl0ZW1fZGV0YWlsMiI+CiAgICAgIDxidWlsZGVyIGNsYXNzPSJ1cmwtY29udGVudC1wYXR0ZXJuLWJ1aWxkZXIiIHBhdHRlcm49InVybD0nKC8vbWRza2lwLnRhb2Jhby5jb20vY29yZS4qPyknIi8+CiAgICAgIDxhZGp1c3RlciBjbGFzcz0idGVtcGxhdGUtY29tYmluZS1hZGp1c3RlciIgdGVtcGxhdGU9Imh0dHBzOiQxIi8+CiAgICA8L2V4dHJhY3Rvci1maWVsZD4KICAgIAogICAgPGV4dHJhY3Rvci1maWVsZCBmcm9tPSJ0ZW1waXRlbV9kZXRhaWwyIiB0bz0idGVtcGl0ZW1fZGV0YWlsMyI+CiAgICAgIDxidWlsZGVyIGNsYXNzPSJmaWVsZC1idWlsZGVyIiBmaWVsZD0ic291cmNlR29vZElkIi8+CiAgICAgIDxhZGp1c3RlciBjbGFzcz0idGVtcGxhdGUtY29tYmluZS1hZGp1c3RlciIgdGVtcGxhdGU9Imh0dHBzOi8vcmF0ZS50YW9iYW8uY29tL2RldGFpbENvdW50LmRvP2l0ZW1JZD0kMSIvPgogICAgPC9leHRyYWN0b3ItZmllbGQ+CiAgICAKICAgIDxleHRyYWN0b3ItZmllbGQgZnJvbT0idGVtcGl0ZW1fZGV0YWlsMyIgdG89Iml0ZW0iPgogICAgICA8YnVpbGRlciBjbGFzcz0iZmllbGQtYnVpbGRlciIgZmllbGQ9InNvdXJjZUdvb2RJZCIvPgogICAgICA8YWRqdXN0ZXIgY2xhc3M9InRlbXBsYXRlLWNvbWJpbmUtYWRqdXN0ZXIiIHRlbXBsYXRlPSJodHRwOi8vdGFlOGpidXkud3guamFlYXBwLmNvbS9pdGVtZGV0YWlsbGlzdD9nb29kc0lkPSQxIi8+CiAgICA8L2V4dHJhY3Rvci1maWVsZD4KCiAgPC9leHRyYWN0b3I+CiAgPHdyaXRlcnM+CiAgICA8d3JpdGVyIHVybC10eXBlPSJ0ZW1waXRlbV9kZXRhaWwiIHdyaXR0ZW49ImZhbHNlIj4KICAgICAgPGZpZWxkcz4KICAgICAgICA8dXJsLXBhdHRlcm4tZmllbGQgbmFtZT0ic291cmNlR29vZElkIiBtdWx0aXBsZT0iZmFsc2UiIGpvYj0iZmFsc2UiIGhhbmRsZS11bmljb2RlPSJmYWxzZSIgcGF0dGVybj0iWyZhbXA7XD9daWQ9KFxkKikmYW1wOz8iLz4KICAgICAgPC9maWVsZHM+CiAgICA8L3dyaXRlcj4KICAgIAogICAgPHdyaXRlciB1cmwtdHlwZT0idGVtcGl0ZW1fZGV0YWlsMiIgd3JpdHRlbj0iZmFsc2UiPgogICAgICA8ZmllbGRzPgogICAgICAgIDxwYXR0ZXJuLWZpZWxkIG5hbWU9InZvbHVtZV9tb250aCIgbXVsdGlwbGU9ImZhbHNlIiBqb2I9ImZhbHNlIiBoYW5kbGUtdW5pY29kZT0iZmFsc2UiIHBhdHRlcm49IlwmcXVvdDtzZWxsQ291bnRcJnF1b3Q7OiguKj8pLCIvPgogICAgICA8L2ZpZWxkcz4KICAgIDwvd3JpdGVyPgogICAgCiAgICA8d3JpdGVyIHVybC10eXBlPSJ0ZW1waXRlbV9kZXRhaWwzIiB3cml0dGVuPSJmYWxzZSI+CiAgICAgIDxmaWVsZHM+CiAgICAgICAgPHBhdHRlcm4tZmllbGQgbmFtZT0iY29tbWVudF9jb3VudCIgbXVsdGlwbGU9ImZhbHNlIiBqb2I9ImZhbHNlIiBoYW5kbGUtdW5pY29kZT0iZmFsc2UiIHBhdHRlcm49IlwmcXVvdDtjb3VudFwmcXVvdDs6KC4qKX0iLz4KICAgICAgPC9maWVsZHM+CiAgICA8L3dyaXRlcj4KICAgIAogICAgPHdyaXRlciB1cmwtdHlwZT0iaXRlbSIgd3JpdHRlbj0iZmFsc2UiPgogICAgICA8ZmllbGRzPgogICAgICAgIDxwYXR0ZXJuLWZpZWxkIG5hbWU9Im9yaVByaWNlIiBtdWx0aXBsZT0iZmFsc2UiIGpvYj0iZmFsc2UiIGhhbmRsZS11bmljb2RlPSJmYWxzZSIgcGF0dGVybj0iaXRlbVByaWNlXCZxdW90Ozpce1wmcXVvdDtwcmljZVwmcXVvdDs6XHtcJnF1b3Q7bmFtZVwmcXVvdDs6XCZxdW90O+S7t+agvFwmcXVvdDssXCZxdW90O3ByaWNlXCZxdW90OzpcJnF1b3Q7KFxkK1wuP1xkKikiLz4KICAgICAgICA8cGF0dGVybi1maWVsZCBuYW1lPSJwcmljZSIgbXVsdGlwbGU9ImZhbHNlIiBqb2I9ImZhbHNlIiBoYW5kbGUtdW5pY29kZT0iZmFsc2UiIHBhdHRlcm49IlwmcXVvdDtwcmljZV93YXBcJnF1b3Q7OlwmcXVvdDsoXGQrXC4/XGQqKS0+XCZxdW90O3Bvc3RfZmVlXCZxdW90OzpcJnF1b3Q7LiosXCZxdW90O3ByaWNlXCZxdW90OzpcJnF1b3Q7KFxkK1wuP1xkKilcJnF1b3Q7LT5cJnF1b3Q7cHJvbW90aW9uUHJpY2VcJnF1b3Q7Olx7XCZxdW90O25hbWUuKnByaWNlXCZxdW90OzpcJnF1b3Q7KFxkK1wuP1xkKikuKlx9XH0iLz4KICAgICAgICA8dXJsLXBhdHRlcm4tZmllbGQgbmFtZT0ic291cmNlR29vZElkIiBtdWx0aXBsZT0iZmFsc2UiIGpvYj0iZmFsc2UiIGhhbmRsZS11bmljb2RlPSJmYWxzZSIgcGF0dGVybj0iWyZhbXA7XD9dZ29vZHNJZD0oXGQqKSZhbXA7PyIvPgogICAgICAgIDxwYXR0ZXJuLWZpZWxkIG5hbWU9ImNhdElkIiBtdWx0aXBsZT0iZmFsc2UiIGpvYj0iZmFsc2UiIGhhbmRsZS11bmljb2RlPSJmYWxzZSIgcGF0dGVybj0iY2lkXCZxdW90OzooLiopLFwmcXVvdDtpc19wYXJlbnRcJnF1b3Q7OmZhbHNlIi8+CiAgICAgIDxwYXR0ZXJuLWZpZWxkIG5hbWU9InBpYyIgbXVsdGlwbGU9ImZhbHNlIiBqb2I9ImZhbHNlIiBoYW5kbGUtdW5pY29kZT0iZmFsc2UiIHBhdHRlcm49IlwmcXVvdDtwaWNfdXJsXCZxdW90OzpcJnF1b3Q7KC4qPylcJnF1b3Q7Ii8+CiAgICAgIDwvZmllbGRzPgogICAgPC93cml0ZXI+CiAgPC93cml0ZXJzPgo8L2NyYXdsZXI+%22}&crawlerCategory=general";
+     alert(content);
+     var panel = document.getElementById("content");
+     panel.innerText  = content;
+     }
+     
+
+function toConf(){
+	 var content = document.getElementById("content").value;
+	 var m=content.match("crawlerConf%22:%22(.*)%22}&crawlerCategory=general");
+	 var value = m[1];
+	 //alert(value);
+	 var unicode = BASE64.decoder(value);//返回编码后的字符  
+
+	 var response = '';  
+	 for(var i = 0 , len =  unicode.length ; i < len ;++i){  
+		 response += String.fromCharCode(unicode[i]);  
+	 }  
+	 
+       var panel = document.getElementById("url");
+            panel.innerText  = response;
+     }
+     
+function toLocalurl(){
+    		var url = document.getElementById("url").value;
+    		
+    		
+    		
+    		 var response = BASE64.encoder(url);//返回编码后的字符  
+    		 //alert(response);
+    		 var content = "http://localhost:8082/crawler/service/generalCrawler?crawlerParams={%22callbackSvcCode%22:%22goodsInfoRecive%22,%22crawlerConf%22:%22"+response+"%22}";
+    	     //  alert(test);
+    	       var panel = document.getElementById("content");
+    	            panel.innerText  = content;
+    	     }
+     
+function toDurl(){
+	var url = document.getElementById("url").value;
+
+	 var response = BASE64.encoder(url);//返回编码后的字符  
+	 //alert(response);
+	 var content = "http://172.17.200.173:8080/goodsBaseService/service/goodsCrawler?crawlerMallCode=0&crawlerParams={%22callbackSvcCode%22:%22goodsInfoRecive%22,%22crawlerConf%22:%22"+response+"%22}&crawlerCategory=general";
+     //  alert(test);
+       var panel = document.getElementById("content");
+            panel.innerText  = content;
+     }
+     
+function toOurl(){
+	var url = document.getElementById("url").value;
+	
+	
+	
+	 var response = BASE64.encoder(url);//返回编码后的字符  
+	 //alert(response);
+	 var content = "http://54.223.203.241:8070/goodsBaseCrawler/service/goodsCrawler?crawlerMallCode=0&crawlerParams={%22callbackSvcCode%22:%22goodsInfoRecive%22,%22crawlerConf%22:%22"+response+"%22}&crawlerCategory=general";
+     //  alert(test);
+       var panel = document.getElementById("content");
+            panel.innerText  = content;
+     }
+     
+function toOTaskurl(){
+	var url = document.getElementById("url").value;
+	
+	
+	
+	 var response = BASE64.encoder(url);//返回编码后的字符  
+	 //alert(response);
+	 var content = "http://10.0.133.56:8080/goodsBaseService/service/goodsCrawler?crawlerMallCode=0&crawlerParams={%22callbackSvcCode%22:%22goodsInfoRecive%22,%22crawlerConf%22:%22"+response+"%22}&crawlerCategory=general";
+     //  alert(test);
+       var panel = document.getElementById("content");
+            panel.innerText  = content;
+     }
+
+
+function check(){
+	var url = document.getElementById("url").value;
+	var xpath = document.getElementById("xpath").value;
+	var pattern = document.getElementById("pattern").value;
+	var charset = document.getElementById("charset").value;
+	var type = document.getElementById("type").value;
+
+ var testurl = "/goodsBaseCrawler/service/htmlDiscoverService?url="+url+"&xpath="+xpath+"&pattern="+pattern+"&charset="+charset;
+     //  alert(testurl);
+       
+ajax({
+        url:"service/htmlDiscoverService",
+        type:"GET",       
+        data:{url:url,xpath,xpath,pattern:pattern,charset:charset,type:type},
+        dataType: "json",
+        success: function (response, xml) {
+              //alert(response);
+             var panel = document.getElementById("content");
+            panel.innerText  = response;
+              
+        },
+        fail: function (status) {
+
+        }
+    });
+     }
+       
+       
+      
+
+    function ajax(options) {
+        options = options || {};
+        options.type = (options.type || "GET").toUpperCase();
+        options.dataType = options.dataType || "json";
+        var params = formatParams(options.data);
+
+        //创建 - 非IE6 - 第一步
+        if (window.XMLHttpRequest) {
+            var xhr = new XMLHttpRequest();
+        } else { //IE6及其以下版本浏览器
+            var xhr = new ActiveXObject('Microsoft.XMLHTTP');
+        }
+
+        //接收 - 第三步
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4) {
+                var status = xhr.status;
+                if (status >= 200 && status < 300) {
+                    options.success && options.success(xhr.responseText, xhr.responseXML);
+                } else {
+                    options.fail && options.fail(status);
+                }
+            }
+        }
+
+        //连接 和 发送 - 第二步
+        if (options.type == "GET") {
+            xhr.open("GET", options.url + "?" + params, false);
+            xhr.send(null);
+        } else if (options.type == "POST") {
+            xhr.open("POST", options.url, true);
+            //设置表单提交时的内容类型
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.send(params);
+        }
+    }
+    //格式化参数
+    function formatParams(data) {
+        var arr = [];
+        for (var name in data) {
+            arr.push(encodeURIComponent(encodeURIComponent(name)) + "=" + encodeURIComponent(encodeURIComponent(data[name])));
+        }
+        arr.push(("v=" + Math.random()).replace(".",""));
+        return arr.join("&");
+    }
+    
+   
+
+   
+    /**
+     *create by 2012-08-25 pm 17:48
+     *@author hexinglun@gmail.com
+     *BASE64 Encode and Decode By UTF-8 unicode
+     *可以和java的BASE64编码和解码互相转化
+     */
+    (function(){
+    	var BASE64_MAPPING = [
+    		'A','B','C','D','E','F','G','H',
+    		'I','J','K','L','M','N','O','P',
+    		'Q','R','S','T','U','V','W','X',
+    		'Y','Z','a','b','c','d','e','f',
+    		'g','h','i','j','k','l','m','n',
+    		'o','p','q','r','s','t','u','v',
+    		'w','x','y','z','0','1','2','3',
+    		'4','5','6','7','8','9','+','/'
+    	];
+
+    	/**
+    	 *ascii convert to binary
+    	 */
+    	var _toBinary = function(ascii){
+    		var binary = new Array();
+    		while(ascii > 0){
+    			var b = ascii%2;
+    			ascii = Math.floor(ascii/2);
+    			binary.push(b);
+    		}
+    		/*
+    		var len = binary.length;
+    		if(6-len > 0){
+    			for(var i = 6-len ; i > 0 ; --i){
+    				binary.push(0);
+    			}
+    		}*/
+    		binary.reverse();
+    		return binary;
+    	};
+
+    	/**
+    	 *binary convert to decimal
+    	 */
+    	var _toDecimal  = function(binary){
+    		var dec = 0;
+    		var p = 0;
+    		for(var i = binary.length-1 ; i >= 0 ; --i){
+    			var b = binary[i];
+    			if(b == 1){
+    				dec += Math.pow(2 , p);
+    			}
+    			++p;
+    		}
+    		return dec;
+    	};
+
+    	/**
+    	 *unicode convert to utf-8
+    	 */
+    	var _toUTF8Binary = function(c , binaryArray){
+    		var mustLen = (8-(c+1)) + ((c-1)*6);
+    		var fatLen = binaryArray.length;
+    		var diff = mustLen - fatLen;
+    		while(--diff >= 0){
+    			binaryArray.unshift(0);
+    		}
+    		var binary = [];
+    		var _c = c;
+    		while(--_c >= 0){
+    			binary.push(1);
+    		}
+    		binary.push(0);
+    		var i = 0 , len = 8 - (c+1);
+    		for(; i < len ; ++i){
+    			binary.push(binaryArray[i]);
+    		}
+
+    		for(var j = 0 ; j < c-1 ; ++j){
+    			binary.push(1);
+    			binary.push(0);
+    			var sum = 6;
+    			while(--sum >= 0){
+    				binary.push(binaryArray[i++]);
+    			}
+    		}
+    		return binary;
+    	};
+
+    	var __BASE64 = {
+    			/**
+    			 *BASE64 Encode
+    			 */
+    			encoder:function(str){
+    				var base64_Index = [];
+    				var binaryArray = [];
+    				for(var i = 0 , len = str.length ; i < len ; ++i){
+    					var unicode = str.charCodeAt(i);
+    					var _tmpBinary = _toBinary(unicode);
+    					if(unicode < 0x80){
+    						var _tmpdiff = 8 - _tmpBinary.length;
+    						while(--_tmpdiff >= 0){
+    							_tmpBinary.unshift(0);
+    						}
+    						binaryArray = binaryArray.concat(_tmpBinary);
+    					}else if(unicode >= 0x80 && unicode <= 0x7FF){
+    						binaryArray = binaryArray.concat(_toUTF8Binary(2 , _tmpBinary));
+    					}else if(unicode >= 0x800 && unicode <= 0xFFFF){//UTF-8 3byte
+    						binaryArray = binaryArray.concat(_toUTF8Binary(3 , _tmpBinary));
+    					}else if(unicode >= 0x10000 && unicode <= 0x1FFFFF){//UTF-8 4byte
+    						binaryArray = binaryArray.concat(_toUTF8Binary(4 , _tmpBinary));	
+    					}else if(unicode >= 0x200000 && unicode <= 0x3FFFFFF){//UTF-8 5byte
+    						binaryArray = binaryArray.concat(_toUTF8Binary(5 , _tmpBinary));
+    					}else if(unicode >= 4000000 && unicode <= 0x7FFFFFFF){//UTF-8 6byte
+    						binaryArray = binaryArray.concat(_toUTF8Binary(6 , _tmpBinary));
+    					}
+    				}
+
+    				var extra_Zero_Count = 0;
+    				for(var i = 0 , len = binaryArray.length ; i < len ; i+=6){
+    					var diff = (i+6)-len;
+    					if(diff == 2){
+    						extra_Zero_Count = 2;
+    					}else if(diff == 4){
+    						extra_Zero_Count = 4;
+    					}
+    					//if(extra_Zero_Count > 0){
+    					//	len += extra_Zero_Count+1;
+    					//}
+    					var _tmpExtra_Zero_Count = extra_Zero_Count;
+    					while(--_tmpExtra_Zero_Count >= 0){
+    						binaryArray.push(0);
+    					}
+    					base64_Index.push(_toDecimal(binaryArray.slice(i , i+6)));
+    				}
+
+    				var base64 = '';
+    				for(var i = 0 , len = base64_Index.length ; i < len ; ++i){
+    					base64 += BASE64_MAPPING[base64_Index[i]];
+    				}
+
+    				for(var i = 0 , len = extra_Zero_Count/2 ; i < len ; ++i){
+    					base64 += '=';
+    				}
+    				return base64;
+    			},
+    			/**
+    			 *BASE64  Decode for UTF-8 
+    			 */
+    			decoder : function(_base64Str){
+    				var _len = _base64Str.length;
+    				var extra_Zero_Count = 0;
+    				/**
+    				 *计算在进行BASE64编码的时候，补了几个0
+    				 */
+    				if(_base64Str.charAt(_len-1) == '='){
+    					//alert(_base64Str.charAt(_len-1));
+    					//alert(_base64Str.charAt(_len-2));
+    					if(_base64Str.charAt(_len-2) == '='){//两个等号说明补了4个0
+    						extra_Zero_Count = 4;
+    						_base64Str = _base64Str.substring(0 , _len-2);
+    					}else{//一个等号说明补了2个0
+    						extra_Zero_Count = 2;
+    						_base64Str = _base64Str.substring(0 , _len - 1);
+    					}
+    				}
+
+    				var binaryArray = [];
+    				for(var i = 0 , len = _base64Str.length; i < len ; ++i){
+    					var c = _base64Str.charAt(i);
+    					for(var j = 0 , size = BASE64_MAPPING.length ; j < size ; ++j){
+    						if(c == BASE64_MAPPING[j]){
+    							var _tmp = _toBinary(j);
+    							/*不足6位的补0*/
+    							var _tmpLen = _tmp.length;
+    							if(6-_tmpLen > 0){
+    								for(var k = 6-_tmpLen ; k > 0 ; --k){
+    									_tmp.unshift(0);
+    								}
+    							}
+    							binaryArray = binaryArray.concat(_tmp);
+    							break;
+    						}
+    					}
+    				}
+
+    				if(extra_Zero_Count > 0){
+    					binaryArray = binaryArray.slice(0 , binaryArray.length - extra_Zero_Count);
+    				}
+
+    				var unicode = [];
+    				var unicodeBinary = [];
+    				for(var i = 0 , len = binaryArray.length ; i < len ; ){
+    					if(binaryArray[i] == 0){
+    						unicode=unicode.concat(_toDecimal(binaryArray.slice(i,i+8)));
+    						i += 8;
+    					}else{
+    						var sum = 0;
+    						while(i < len){
+    							if(binaryArray[i] == 1){
+    								++sum;
+    							}else{
+    								break;
+    							}
+    							++i;
+    						}
+    						unicodeBinary = unicodeBinary.concat(binaryArray.slice(i+1 , i+8-sum));
+    						i += 8 - sum;
+    						while(sum > 1){
+    							unicodeBinary = unicodeBinary.concat(binaryArray.slice(i+2 , i+8));
+    							i += 8;
+    							--sum;
+    						}
+    						unicode = unicode.concat(_toDecimal(unicodeBinary));
+    						unicodeBinary = [];
+    					}
+    				}
+    				return unicode;
+    			}
+    	};
+
+    	window.BASE64 = __BASE64;
+    })();
+ </script>
+</HTML>

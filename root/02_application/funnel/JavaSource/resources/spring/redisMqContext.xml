@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.5.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd"
+	default-lazy-init="false">
+	<!--redis queue监听者 -->
+	<bean class="com.funnel.redis.queue.RedisQueueReceiver"
+		init-method="start" destroy-method="end">
+		<property name="failSleepTime" value="1000"></property>
+		<property name="redisServcie" ref="goodsRedisService"></property>
+		<property name="consumers">
+			<map>
+				<entry key="goods:crawler:req" value-ref="reqConsumer"></entry>
+			</map>
+		</property>
+	</bean>
+	<!--商品爬取请求队列消费者 -->
+	<bean id="reqConsumer" class="com.funnel.redis.queue.DefaultRedisConsumer">
+		<property name="corePoolSize" value="2"></property>
+		<property name="maxPoolSize" value="5"></property>
+		<property name="queueCapacity" value="1000"></property>
+		<property name="messageHandler">
+			<ref bean="mongoStoreHandler" />
+		</property>
+	</bean>
+	<bean id="mongoStoreBatchHandler" class="com.funnel.store.MongoStoreBatchHandler">
+	</bean>
+
+
+	<!--发布订阅通道 -->
+	<bean class="com.funnel.redis.publish.RedisMessagePublisher"
+		init-method="start" destroy-method="end">
+		<property name="redisServcie" ref="goodsRedisService"></property>
+		<property name="subscribers">
+			<map>
+				<entry key="goods:crawler:sub" value-ref="reqSubscriber"></entry>
+			</map>
+		</property>
+	</bean>
+	<bean id="reqSubscriber" class="com.funnel.redis.publish.DefaultRedisSubscriber">
+		<property name="messageHandler">
+			<ref bean="mongoStoreHandler" />
+		</property>
+	</bean>
+	<bean id="mongoStoreHandler" class="com.funnel.store.MongoStoreHandler">
+	</bean>
+
+</beans>

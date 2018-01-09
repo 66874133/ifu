@@ -1,0 +1,1 @@
+pgrep mongo | xargs kill 

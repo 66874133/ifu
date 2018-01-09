@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="GB2312"?>
+<sqlMap namespace="goodsInfo">
+	
+	<delete id="removeGoodsInfoById" parameterClass="java.lang.String">
+		begin
+		 delete goods_image
+             where id in (select img_id
+                from goods_image_resources imgRes, goods_detail gd
+               where imgRes.id = gd.img_res_id
+                 and gd.goods_id = #goodsId#);
+         delete goods_image_resources where id in (select img_res_id from goods_detail where goods_id = #goodsId#);
+         delete goods_image
+           where id in (select img_id
+                from goods_image_resources imgRes, goods_detail_img_text gt
+               where imgRes.id = gt.img_res_id
+                 and gt.goods_id = #goodsId#);
+         delete goods_image_resources where id in (select img_res_id from goods_detail_img_text where goods_id = #goodsId#);
+         delete goods_detail_img_text where goods_id = #goodsId#;
+         delete goods_detail where goods_id = #goodsId#;
+         delete goods_info where goods_id = #goodsId#;
+		end;
+	</delete>
+
+	<insert id="addGoods" parameterClass="java.util.HashMap">
+        insert into  goods_info 
+            (ID,goods_id,mobile_url,pc_url,mobile_rebate_url,pc_rebate_url,source_mall_code,SOURCE_GOODS_ID,data_source,state,create_date,update_date) 
+        values (s_goods_info.nextval,#goodsId#,#mobileUrl#,#pcUrl#,#mobileRebateUrl#,#pcRebateUrl#,#sourceMallCode#,#sourceGoodsId#,#dataSource#,1,to_date(#createDate#,'yyyy-mm-dd hh24:mi:ss'),to_date(#updateDate#,'yyyy-mm-dd hh24:mi:ss'))
+	</insert>
+	
+	<insert id="addGoodsImg" parameterClass="java.util.HashMap">
+		<selectKey resultClass="java.lang.Long" keyProperty="imgId" > 
+		SELECT s_goods_image.nextval AS imgId FROM DUAL 
+		</selectKey> 
+        insert into  goods_image
+            (ID,IMG_SOURCE_URL,IMG_URL,AVAILABLE,create_date,update_date) 
+        values (#imgId#,#imgSourceUrl#,#imgUrl#,1,sysdate,sysdate)
+	</insert>
+	<insert id="addGoodsImgRes" parameterClass="java.util.HashMap">
+		<selectKey resultClass="java.lang.Long" keyProperty="imgResId" > 
+		SELECT s_goods_image_resources.nextval AS imgResId FROM DUAL 
+		</selectKey> 
+        insert into  goods_image_resources 
+            (ID,img_id,img_width,img_height,AVAILABLE,create_date,update_date) 
+        values (#imgResId#,#imgId#,#imgWidth#,#imgHeight#,1,sysdate,sysdate)
+	</insert>
+	<insert id="addGoodsDetail" parameterClass="java.util.HashMap">
+		<selectKey resultClass="java.lang.Long" keyProperty="detailId" > 
+		SELECT s_goods_detail.nextval AS detailId FROM DUAL 
+		</selectKey> 
+        insert into  goods_detail
+            (ID,goods_id,source_code,source_url,goods_name,source_category,category_code,price,priceUnitCode,ori_price,comment_count,coupon,coupon_link,type,page,index_in_page,cid,img_res_id,has_imgtext_detail,is_default,sale_count,AVAILABLE,create_date,update_date) 
+        values (#detailId#,#goodsId#,#sourceCode#,#sourceUrl#,#goodsName#,#sourceCategory#,#categoryCode#,#price#,#priceUnitCode#,#oriPrice#,#commentCount#,#coupon#,#couponLink#,#type#,#page#,#indexInPage#,#cid#,#imgResId#,#hasImgtextDetail#,#isDefault#,#saleCount#,1,to_date(#createDate#,'yyyy-mm-dd hh24:mi:ss'),to_date(#updateDate#,'yyyy-mm-dd hh24:mi:ss'))
+	</insert>
+	
+	<insert id="addGoodsImgText" parameterClass="java.util.HashMap">
+        insert into  goods_detail_img_text
+            (ID,goods_id,detail_id,source_code,img_text_type,img_res_id,text_content,order_number,AVAILABLE,create_date,update_date) 
+        values (s_goods_detail_img_text.nextval,#goodsId#,#detailId#,#sourceCode#,#imgTextType#,#imgResId#,#textContent#,#orderNum#,1,to_date(#createDate#,'yyyy-mm-dd hh24:mi:ss'),to_date(#updateDate#,'yyyy-mm-dd hh24:mi:ss'))
+	</insert>
+	
+	
+	<update id="downShelfGoods" parameterClass="java.lang.String">
+        update  goods_info set state=2 where goods_id=to_number(#goodsId#)
+	</update>
+	
+	<update id="onShelfGoods" parameterClass="java.lang.String">
+        update  goods_info set state=1 where goods_id=to_number(#goodsId#)
+	</update>
+
+	<select id="queryGoodsInfoList" parameterClass="java.util.HashMap"
+		resultClass="java.util.HashMap">
+
+    select
+        gInfo.State state,
+        gInfo.goods_id goodsId,
+        gInfo.Mobile_Url mobileUrl,
+        gInfo.Mobile_Rebate_Url mobileRebateUrl,
+        gInfo.Pc_Url pcUrl,
+        gInfo.Pc_Rebate_Url pcRebateUrl,
+        gInfo.Source_Mall_Code sourceMallCode,
+        gDetail.id goodsDetailId,
+        gDetail.source_code detailSourceCode,
+        gDetail.source_url detailSourceUrl,
+        gDetail.goods_name goodsName,
+        gDetail.Category_Code categoryCode ,
+        gDetail.HAS_IMGTEXT_DETAIL hasImgTextDetail,
+        GOODS_CLASS.NAME categoryName,
+        gDetail.Price price ,
+        gDetail.Priceunitcode priceUnitCode,
+        img.img_source_url imgSourceUrl,
+        img.img_url imgUrl,
+        to_char(gDetail.Update_Date,'yyyy-mm-dd hh24:mi:ss') updateDate
+    from 
+        goods_info gInfo,
+        goods_detail gDetail,
+        goods_image_resources imgRes,
+        goods_image img,
+        GOODS_CLASS
+    where 
+        gInfo.goods_id = gDetail.goods_id
+        and gDetail.Is_Default = 1
+        and gDetail.Available = 1
+        and gDetail.Img_Res_Id = imgRes.id
+        and imgRes.Img_Id = img.id
+        and imgRes.Available = 1
+        and img.available = 1
+        and gDetail.cid = GOODS_CLASS.cid
+		<isNotEmpty property="state" prepend="and">
+			gInfo.State = to_number(#state#)
+		</isNotEmpty>
+		<isNotEmpty property="goodsName" prepend="and">
+			gDetail.goods_name like '%'||#goodsName#||'%'
+		</isNotEmpty>
+		<isNotEmpty property="goodsId" prepend="and">
+			gInfo.goods_id = to_number(#goodsId#)
+		</isNotEmpty>
+		<isNotEmpty property="sourseMallCode" prepend="and">
+			gInfo.Source_Mall_Code = to_number(#sourseMallCode#)
+		</isNotEmpty>
+		<isNotEmpty property="categoryCode" prepend="and">
+			gDetail.cid = to_number(#categoryCode#)
+		</isNotEmpty>
+		<isNotEmpty property="priceStart" prepend="and">
+			gDetail.Price &gt;= to_number(#priceStart#)
+		</isNotEmpty>
+		<isNotEmpty property="priceEnd" prepend="and">
+			gDetail.Price &lt;= to_number(#priceEnd#)
+		</isNotEmpty>
+		<isNotEmpty property="updateDateStart" prepend="and">
+			<![CDATA[
+				gDetail.Update_Date >= TO_DATE(#updateDateStart#,'yyyy-mm-dd')
+		    ]]>
+		</isNotEmpty>
+		<isNotEmpty property="updateDateEnd" prepend="and">
+			<![CDATA[
+				gDetail.Update_Date <= TO_DATE(concat(#updateDateEnd#,' 23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+		    ]]>
+		</isNotEmpty>
+		<isNotEmpty property="hasImgTextDetail" prepend="and">
+				gDetail.HAS_IMGTEXT_DETAIL = to_number(#hasImgTextDetail#)
+		</isNotEmpty>
+
+	order by gDetail.Update_Date desc
+	</select>
+	
+	
+	<select id="queryGoodsInfos" parameterClass="java.util.HashMap"
+		resultClass="java.util.HashMap">
+    select * from (
+	select
+		gInfo.State state,
+		gInfo.goods_id goodsId,
+		gInfo.Source_Mall_Code sourceMallCode,
+		gDetail.id goodsDetailId,
+		gDetail.source_code detailSourceCode,
+		gDetail.source_url detailSourceUrl,
+		gDetail.goods_name goodsName,
+		gDetail.source_category sourceCategory ,
+		gDetail.HAS_IMGTEXT_DETAIL hasImgTextDetail,
+		gDetail.Price price ,
+		gDetail.Priceunitcode priceUnitCode,
+		gDetail.cid cid ,
+		gDetail.sale_count saleCount ,
+		gDetail.ori_price oriPrice,
+		gDetail.comment_count commentCount,
+		gDetail.coupon coupon,
+
+		to_char(gDetail.Update_Date,'yyyy-mm-dd hh24:mi:ss') updateDate,
+		to_char(gDetail.Create_Date,'yyyy-mm-dd hh24:mi:ss') createDate
+	from 
+		goods_info gInfo,
+		goods_detail gDetail,
+		goods_image_resources imgRes,
+		goods_image img
+	where 
+	    gInfo.goods_id = gDetail.goods_id
+		and gDetail.Is_Default = 1
+		and gDetail.Available = 1
+		and gDetail.Img_Res_Id = imgRes.id
+		and imgRes.Img_Id = img.id
+		and imgRes.Available = 1
+		and img.available = 1
+		and gDetail.price is not null
+       
+		<isNotEmpty property="state" prepend="and">
+			gInfo.State = to_number(#state#)
+		</isNotEmpty>
+		<isNotEmpty property="goodsName" prepend="and">
+			gDetail.goods_name like '%'||#goodsName#||'%'
+		</isNotEmpty>
+		<isNotEmpty property="goodsId" prepend="and">
+			gInfo.goods_id = to_number(#goodsId#)
+		</isNotEmpty>
+		<isNotEmpty property="sourseMallCode" prepend="and">
+			gInfo.Source_Mall_Code = to_number(#sourseMallCode#)
+		</isNotEmpty>
+		<isNotEmpty property="categoryCodes" prepend="and">
+			gDetail.source_category in ($categoryCodes$)  
+		</isNotEmpty>
+		<isNotEmpty property="classifyIds" prepend="and">
+			gDetail.cid in ($classifyIds$)  
+		</isNotEmpty>
+		<isNotEmpty property="priceStart" prepend="and">
+			gDetail.Price &gt;= to_number(#priceStart#)
+		</isNotEmpty>
+		<isNotEmpty property="priceEnd" prepend="and">
+			gDetail.Price &lt; to_number(#priceEnd#)
+		</isNotEmpty>
+		<isNotEmpty property="type" prepend="and">
+			gDetail.type = to_number(#type#)
+		</isNotEmpty>
+		<isNotEmpty property="updateDateStart" prepend="and">
+			<![CDATA[
+				gDetail.Update_Date >= TO_DATE(#updateDateStart#,'yyyy-mm-dd')
+		    ]]>
+		</isNotEmpty>
+		<isNotEmpty property="updateDateEnd" prepend="and">
+			<![CDATA[
+				gDetail.Update_Date <= TO_DATE(concat(#updateDateEnd#,' 23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+		    ]]>
+		</isNotEmpty>
+		<isNotEmpty property="hasImgTextDetail" prepend="and">
+				gDetail.HAS_IMGTEXT_DETAIL = to_number(#hasImgTextDetail#)
+		</isNotEmpty>
+        order by gDetail.Update_Date desc
+        )  where rownum&lt;=to_number(#limit#)
+	</select>
+	
+	<select id="querySourseMallCode" resultClass="com.funnel.goods.cache.goodsMall.GoodsMallInfo">
+		select mall_type mapType,mall_code code,mall_name label
+  		from goods_mall
+   		where AVAILABLE = 1 and display = 1
+
+	</select>
+	
+	<select id="queryGoodsCategoryCode" resultClass="com.funnel.goods.bean.goodsCategory.GoodsCategory">
+<!-- 		select CATEGORY_CODE code,CATEGORY_NAME label
+  		from GOODS_CATEGORY
+   		where AVAILABLE = 1     -->
+   		select cid code, name label from GOODS_CLASS where state = 1
+
+	</select>
+	
+	
+	<update id="freeseOrUnfreezeGoods" parameterClass="java.util.HashMap">
+		update  goods_info set state=#state# where goods_id=to_number(#goodsId#)
+	</update>
+
+</sqlMap>

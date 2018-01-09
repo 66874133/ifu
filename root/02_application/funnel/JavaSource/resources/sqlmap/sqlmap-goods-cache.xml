@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="GB2312"?>
+<sqlMap namespace="cache">
+	
+	<select id="querySysParams" resultClass="com.funnel.goods.cache.bean.SysParam">
+		select param_type paramType,param_key paramKey,param_value paramValue from goods_sys_params		
+	</select>
+	<insert id="insertParam" parameterClass="com.funnel.goods.cache.bean.SysParam">
+		insert into goods_sys_params (param_type,param_key,param_value) values (#paramType#,#paramKey#,#paramValue#)
+	</insert>
+	<update id="updateParam" parameterClass="com.funnel.goods.cache.bean.SysParam">
+		update goods_sys_params set param_value=#paramValue# where param_key= #paramKey# and param_type=#paramType#
+	</update>
+	
+	<select id="queryGoodsMall" resultClass="com.funnel.goods.cache.bean.GoodsMallInfo">
+		select mall_type mapType,mall_code mallCode,mall_name mallName
+  from goods_mall
+   where AVAILABLE = 1
+
+	</select>
+	<select id="queryGoodsMallAndLinkTechRebateUrlPerfixMapp" resultClass="java.util.HashMap">
+		select mall_code mallCode,url_type urlType,url_perfix urlPerfix
+  from goods_mall_linktech_url_mapp
+   where AVAILABLE = 1
+
+	</select>
+	
+	<select id="queryRankConfs" resultClass="com.funnel.goods.cache.bean.GoodsRankConfInfo">
+		select rank_code rankCode,rank_data_source_code rankDataSourceCode,rank_categorys rankCategorys,rank_price_rang_begin rankPriceBegin,rank_price_rang_end rankPriceEnd,rank_classify rankClassify,rank_mall_code rankMallCode,rank_desc rankDesc,rank_group rankGroup
+		      ,rank_record_size rankRecordSize
+		      ,rank_expression_conf rankExpressionConf
+		      ,rank_expression rankExpression
+		      ,rank_record_type rankRecordType
+		      ,type type
+  from goods_rank_conf
+   where AVAILABLE = 1
+
+	</select>
+	
+	<select id="queryGoodsClassMap" resultClass="com.funnel.goods.cache.bean.GoodsClassMapping">
+		select source_code sourceCode, GOODS_CLASS_CID goodsClassId,GOODS_SOURCE_CLASS_CID goodsSourceClassId
+  from goods_class_map
+   where AVAILABLE = 1
+	</select>
+	
+</sqlMap>

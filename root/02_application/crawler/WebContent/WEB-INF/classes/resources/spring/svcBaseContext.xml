@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.5.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd"
+	default-lazy-init="false">
+	<!-- 服务，转换器等注册处理 -->
+	<bean class="com.funnel.svc.spring.SvcRegPorcessorBean"></bean>
+	<!--服务框架配置 -->
+	<bean class="com.funnel.svc.config.ServiceConf"
+		init-method="start" destroy-method="stop">
+		<!--服务器id -->
+		<property name="serverName" value="crawler" />
+		<property name="svcRegCenterUrl" value="${svcRegCenterUrl}" />
+
+		<!--异步服务执行线程池大小设置 -->
+		<property name="corePoolSize" value="100" />
+		<property name="maxPoolSize" value="100" />
+		<!--异步服务执行线程池队列大小设置 -->
+		<property name="queueCapacity" value="3000" />
+	</bean>
+	<!--服务框架配置完成 -->
+
+	<!-- 接收报文转换器配置 -->
+	<bean
+		class="com.funnel.svc.transformer.impl.JsonFormatTransformer">
+	</bean>
+	<!-- 转换器配置结束 -->
+	
+	
+	<bean class="com.funnel.svc.web.SvcContralSvc"></bean>
+	
+	<!--redis配置-->
+	<bean id="goodsJedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<property name="maxTotal" value="${goods.redis.pool.maxActive}" />
+		<property name="maxIdle" value="${goods.redis.pool.maxIdle}" />
+		<property name="minIdle" value="${goods.redis.pool.minIdle}" />
+		<property name="maxWaitMillis" value="${goods.redis.pool.maxWait}" />
+		<property name="testOnBorrow" value="${goods.redis.pool.testOnBorrow}" />
+	</bean>
+
+	<bean id="goodsJedisPool" class="redis.clients.jedis.JedisPool">
+		<constructor-arg index="0" ref="goodsJedisPoolConfig" />
+		<constructor-arg index="1" value="${goods.redis.url}" />
+		<constructor-arg index="2" value="${goods.redis.port}" />
+		<constructor-arg index="3" value="${goods.redis.timeout}" />
+	</bean>
+
+	<bean id="goodsRedisService" class="com.funnel.redis.RedisPoolServcieDelegate">
+		<property name="jedisPool" ref="goodsJedisPool" />
+	</bean>
+	
+	
+	<bean class="com.funnel.redis.RedisContralSvc">
+		<property name="redisServcie" ref="goodsRedisService"></property>
+	</bean>
+	<!-- 业务服务注册 -->
+	<bean class="com.funnel.svc.util.ApplicationUtil"
+		lazy-init="false">
+		<property name="goodsRedisService" ref="goodsRedisService" />
+	</bean>
+</beans>

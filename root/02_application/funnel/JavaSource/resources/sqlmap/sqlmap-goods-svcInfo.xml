@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="GB2312"?>
+<sqlMap namespace="svcInfo">
+
+	<select id="querySvcInfo" resultClass="com.funnel.svc.svcReg.ServiceInfo">
+		select svc_code svcCode,urls from svc_reg_info
+	</select>
+</sqlMap>

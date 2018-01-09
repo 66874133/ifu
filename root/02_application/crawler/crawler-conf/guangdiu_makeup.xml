@@ -1,0 +1,93 @@
+<crawler source="1" mall="16" name="test" encode="UTF-8" category="美妆">
+  <starter class="seeds-starter">
+    <seeds>
+      <string>http://guangdiu.com/</string>
+    </seeds>
+  </starter>
+  <extractor>
+    <extractor-field from="seed" to="list">
+      <builder class="template-builder" template="http://guangdiu.com/cate.php?k=makeup&amp;m=天猫&amp;p=$1">
+        <multiple-number-builder target="1-2"/>
+      </builder>
+    </extractor-field>
+    <extractor-field from="list" to="tempitem">
+      <builder class="path-builder" path="h2/a[@class='goodname']/@href" pattern="" order="false"/>
+      <adjuster class="url-relative-path-adjuster"/>
+    </extractor-field>
+     <extractor-field name="source_url" from="list" to="tempitem">
+      <builder class="path-builder" path="h2/a[@class='goodname']/@href" pattern="" order="false"/>
+      <adjuster class="url-relative-path-adjuster"/>
+    </extractor-field>
+     <extractor-field name="url" from="list" to="tempitem">
+      <builder class="path-builder" path="div/a[@class='innergototobuybtn']/@href" pattern="" order="false"/>
+    </extractor-field>
+    <extractor-field name="name" from="list" to="tempitem">
+      <builder class="path-builder" path="h2[@class='mallandname']/a[@class='goodname']/@title" order="false"/>
+    </extractor-field>
+    
+   
+    
+     <extractor-field from="tempitem" to="tempitem_detail">
+      <builder class="path-builder" path="div[@class='dtitle']/a/@href" pattern="" order="false"/>
+    </extractor-field>
+    
+    <extractor-field from="tempitem_detail" to="tempitem_detail2">
+      <builder class="url-content-pattern-builder" pattern="url='(//mdskip.taobao.com/core.*?)'"/>
+      <adjuster class="template-combine-adjuster" template="https:$1"/>
+    </extractor-field>
+    
+    <extractor-field from="tempitem_detail2" to="tempitem_detail3">
+      <builder class="field-builder" field="sourceGoodId"/>
+      <adjuster class="template-combine-adjuster" template="https://rate.taobao.com/detailCount.do?itemId=$1"/>
+    </extractor-field>
+    
+    <extractor-field from="tempitem_detail3" to="item">
+      <builder class="field-builder" field="sourceGoodId"/>
+      <adjuster class="template-combine-adjuster" template="http://tae8jbuy.wx.jaeapp.com/itemdetaillist?goodsId=$1"/>
+    </extractor-field>
+  </extractor>
+  <writers>
+    <writer url-type="item" written="false">
+      <fields>
+        <pattern-field name="oriPrice" multiple="false" job="false" handle-unicode="false" pattern="itemPrice\&quot;:\{\&quot;price\&quot;:\{\&quot;name\&quot;:\&quot;价格\&quot;,\&quot;price\&quot;:\&quot;(\d+\.?\d*)"/>
+        <pattern-field name="price" multiple="false" job="false" handle-unicode="false" pattern="\&quot;price_wap\&quot;:\&quot;(\d+\.?\d*)->\&quot;post_fee\&quot;:\&quot;.*,\&quot;price\&quot;:\&quot;(\d+\.?\d*)\&quot;->\&quot;promotionPrice\&quot;:\{\&quot;name.*price\&quot;:\&quot;(\d+\.?\d*).*\}\}"/>
+        <pattern-field name="catId" multiple="false" job="false" handle-unicode="false" pattern="cid\&quot;:(.*),\&quot;is_parent\&quot;:false"/>
+        <pattern-field name="pic" multiple="false" job="false" handle-unicode="false" pattern="\&quot;pic_url\&quot;:\&quot;(.*?)\&quot;"/>
+      </fields>
+    </writer>
+    
+    <writer url-type="tempitem_detail" written="false">
+      <fields>
+        <url-pattern-field name="sourceGoodId" multiple="false" job="false" handle-unicode="false" pattern="[&amp;\?]id=(\d*)&amp;?"/>
+      </fields>
+    </writer>
+
+    <writer url-type="tempitem_detail2" written="false">
+      <fields>
+        <pattern-field name="volume_month" multiple="false" job="false" handle-unicode="false" pattern="\&quot;sellCount\&quot;:(.*?),"/>
+      </fields>
+    </writer>
+    
+    <writer url-type="tempitem_detail3" written="false">
+      <fields>
+        <pattern-field name="comment_count" multiple="false" job="false" handle-unicode="false" pattern="\&quot;count\&quot;:(.*)}"/>
+      </fields>
+    </writer>
+    
+     <writer url-type="tempitem" written="false">
+      <fields>
+         <simple-field name="detail_titile" multiple="false" job="false" handle-unicode="false" path="div[@class='dtitle']">
+        </simple-field>
+         <simple-field name="detail_abstract" multiple="false" job="false" handle-unicode="false" path="div[@class='dabstract']">
+        </simple-field>
+         <simple-field name="detail_pic" multiple="false" job="false" handle-unicode="false" path="a[@class='dimage']/img/@src|p/img/@src|div[@class='dimage']/img/@src">
+        </simple-field>
+          <simple-field name="coupon" multiple="true" append="," job="false" handle-unicode="false" path="[text='券']/parent()[@isconvert='1']">
+        </simple-field>
+         <simple-field name="coupon_link" multiple="true" append="," job="false" handle-unicode="false" path="[text='券']/parent()[@isconvert='1']/@href">
+        </simple-field>
+      </fields>
+    </writer>
+    
+  </writers>
+</crawler>

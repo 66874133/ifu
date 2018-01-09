@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.5.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd"
+	default-lazy-init="false">
+	<!--榜单调度接口服务-->
+	<bean class="com.funnel.rank.service.GoodsRankScheduleSvc">
+	</bean>
+	
+	<bean class="com.funnel.photo.PhotoResolveService">
+	</bean>
+	<!--商品榜单生成流程服务-->
+	<bean class="com.funnel.svc.flow.AsyncFlowService">
+		<property name="svcCode" value="goodsRankGennerFlow"></property>
+		<property name="svcDesc" value="商品榜单生成流程"></property>
+		<property name="nodes">
+			<list>
+			    <value>goodsRankStartServiceNode</value>
+				<value>autoRankEngineServiceNode</value>
+				<value>atuoRankAndOperateDataQueryNodeV2</value>
+				<value>goodsRankMergeNode</value>
+				<value>saveMergedRankDataServiceNode</value>
+				<value>goodsRankNotifyOtherServiceNode</value>
+				<value>goodsRankFinishedServiceNode</value>
+			</list>
+		</property>
+	</bean>
+	
+	<!--榜单生成开始节点-->
+	<bean class="com.funnel.rank.service.flows.GoodsRankStartServiceNode"></bean>
+	<!--榜单生成结束节点-->
+	<bean class="com.funnel.rank.service.flows.GoodsRankFinishedServiceNode"></bean>
+	
+	<!--根据商品类别自动生成榜单节点-->
+	
+	<bean class="com.funnel.rank.service.flows.AutoRankEngineServiceNode"></bean>
+	<!--自动生成榜单数据和运营数据查询节点-->
+	
+	<bean class="com.funnel.rank.service.flows.AtuoRankAndOperateDataQueryNodeV2"></bean>
+	<!--榜单数据合并节点-->
+	<bean class="com.funnel.rank.service.flows.GoodsRankMergeNode"></bean>
+	<!--榜单数据保存节点-->
+	<bean class="com.funnel.rank.service.flows.SaveMergedRankDataServiceNode"></bean>
+	<!--榜单数据变化通知其他业务节点-->
+	<bean class="com.funnel.rank.service.flows.GoodsRankNotifyOtherServiceNode">
+		<property name="goodsInfoGoodsServiceQueueName" value="${dev.goodsInfoGoodsServiceQueueName}"></property>
+	</bean>
+
+	
+
+</beans>

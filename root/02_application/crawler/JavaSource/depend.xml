@@ -1,0 +1,19 @@
+<execute-depend-config depend="fetcher-writer|writer-extractor">
+  <executors>
+      
+
+      <excuteable class="com.duplex.crawler.core.executor.HttpFetcherExecutor">
+        <key>fetcher</key>
+      </excuteable>
+
+      <excuteable class="com.duplex.crawler.core.executor.ExtractExecutor">
+        <key>extractor</key>
+      </excuteable>
+      
+      <excuteable class="com.duplex.crawler.core.executor.WriterExecutor">
+        <key>writer</key>
+      </excuteable>
+ 
+
+  </executors>
+</execute-depend-config>

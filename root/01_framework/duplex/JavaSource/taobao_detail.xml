@@ -1,0 +1,59 @@
+<crawler source="1" mall="10" name="test" encode="UTF-8" category="未定义">
+  <starter class="seeds-starter" prefix="http://item.taobao.com/item.htm?id=">
+    <seeds>
+
+    </seeds>
+  </starter>
+  <extractor>
+    <extractor-field from="seed" to="tempitem_detail2">
+      <builder class="url-content-pattern-builder" pattern="(//detailskip.taobao.com/service/getData/1/p1/item/detail/sib.htm\?itemId=.*)'"/>
+      <adjuster class="template-combine-adjuster" template="https:$1"/>
+    </extractor-field>
+    
+    <extractor-field from="tempitem_detail2" to="tempitem_detail3">
+      <builder class="field-builder" field="sourceGoodId"/>
+      <adjuster class="template-combine-adjuster" template="https://rate.taobao.com/detailCount.do?itemId=$1"/>
+    </extractor-field>
+    
+    <extractor-field from="tempitem_detail3" to="item">
+      <builder class="field-builder" field="sourceGoodId"/>
+      <adjuster class="template-combine-adjuster" template="http://tae8jbuy.wx.jaeapp.com/itemdetaillist?goodsId=$1"/>
+    </extractor-field>
+    
+    
+
+  </extractor>
+  <writers>
+     <writer url-type="seed" written="false">
+      <fields>
+       <url-pattern-field name="sourceGoodId" multiple="false" job="false" handle-unicode="false" pattern="[&amp;\?]id=(\d*)&amp;?"/>
+      </fields>
+     </writer>
+    
+     <writer url-type="tempitem_detail2" written="false">
+      <fields>
+        <pattern-field name="volume_month" multiple="false" job="false" handle-unicode="false" pattern="\&quot;soldTotalCount\&quot;:(\d+\.?\d*)"/>
+      </fields>
+    </writer>
+    
+    <writer url-type="tempitem_detail3" written="false">
+      <fields>
+        <pattern-field name="comment_count" multiple="false" job="false" handle-unicode="false" pattern="\&quot;count\&quot;:(.*)}"/>
+      </fields>
+    </writer>
+    
+    <writer url-type="item" written="false">
+      <fields>
+        <pattern-field name="oriPrice" multiple="false" job="false" handle-unicode="false" pattern="itemPrice\&quot;:\{\&quot;price\&quot;:\{\&quot;name\&quot;:\&quot;价格\&quot;,\&quot;price\&quot;:\&quot;(\d+\.?\d*)"/>
+        <url-pattern-field name="url" multiple="false" job="false" handle-unicode="false" pattern="goodsId=(.*)">
+        <adjuster class="template-combine-adjuster" template="http://item.taobao.com/item.htm?id=$1"/>
+        </url-pattern-field>
+        
+        <pattern-field name="catId" multiple="false" job="false" handle-unicode="false" pattern="cid\&quot;:(.*),\&quot;is_parent\&quot;:false"/>
+        <pattern-field name="name" multiple="false" job="false" handle-unicode="false" pattern="\&quot;title\&quot;:\&quot;(.*)\&quot;"/>
+        <pattern-field name="pic" multiple="false" job="false" handle-unicode="false" pattern="\&quot;pic_url\&quot;:\&quot;(.*?)\&quot;"/>
+        <pattern-field name="price" multiple="false" job="false" handle-unicode="false" pattern="\&quot;price_wap\&quot;:\&quot;(\d+\.?\d*)->\&quot;post_fee\&quot;:\&quot;.*,\&quot;price\&quot;:\&quot;(\d+\.?\d*)\&quot;->\&quot;promotionPrice\&quot;:\{\&quot;name.*price\&quot;:\&quot;(\d+\.?\d*).*\}\}"/>
+      </fields>
+    </writer>
+  </writers>
+</crawler>

@@ -1,0 +1,48 @@
+<crawler source="16" mall="16" name="test" encode="GBK" category="adult">
+  <starter class="seeds-starter">
+    <seeds>
+      <string>https://list.tmall.com/search_product.htm?cat=53340007&amp;sort=new&amp;s=0</string>
+    </seeds>
+  </starter>
+  <extractor>
+    <extractor-field name="url" from="seed" to="list">
+      <builder class="template-builder" template="https://list.tmall.com/search_product.htm?cat=53340007&amp;sort=d&amp;s=$1">
+        <multiple-number-builder target="60*1-5"/>
+      </builder>
+    </extractor-field>
+    <extractor-field name="price" from="list" to="item">
+      <builder class="path-builder" path="div[@id=&apos;J_ItemList&apos;]/div/div/p[@class=&apos;productPrice&apos;]" pattern="&amp;yen;(\d+\.?\d*)" order="false"/>
+    </extractor-field>
+    <extractor-field name="url" from="list" to="item">
+      <builder class="path-builder" path="div[@id=&apos;J_ItemList&apos;]/div/div/p[@class=&apos;productTitle&apos;]/a/@href" pattern="(.*?)&amp;" order="false"/>
+      <adjuster class="url-protocol-adjuster"/>
+    </extractor-field>
+    <extractor-field name="volume_month" from="list" to="item">
+      <builder class="path-builder" path="div[@id=&apos;J_ItemList&apos;]/div/div/p[@class=&apos;productStatus&apos;]/span/em" pattern="(.*)笔" order="false"/>
+      <adjuster class="unit-adjuster"/>
+    </extractor-field>
+    <extractor-field name="comment_count" from="list" to="item">
+      <builder class="path-builder" path="div[@id=&apos;J_ItemList&apos;]/div/div/p[@class=&apos;productStatus&apos;]/span/a" order="false"/>
+      <adjuster class="unit-adjuster"/>
+    </extractor-field>
+    <extractor-field name="name" from="list" to="item">
+      <builder class="path-builder" path="div[@id=&apos;J_ItemList&apos;]/div/div/p[@class=&apos;productTitle&apos;]" order="false"/>
+    </extractor-field>
+  </extractor>
+  <writers>
+    <writer url-type="item" written="false">
+      <fields>
+        <pattern-field name="oriPrice" multiple="false" job="false" handle-unicode="false" pattern="reservePrice&quot;:&quot;(.*?)&quot;,"/>
+        <simple-field name="pic" multiple="false" job="false" handle-unicode="false" path="img[@id=&apos;J_ImgBooth&apos;]/@src">
+          <adjuster class="url-protocol-adjuster"/>
+        </simple-field> <simple-field name="pic" multiple="false" job="false" handle-unicode="false" path="img[@id=&apos;J_ImgBooth&apos;]/@src">
+          <adjuster class="url-protocol-adjuster"/>
+        </simple-field> <simple-field name="pic" multiple="false" job="false" handle-unicode="false" path="img[@id=&apos;J_ImgBooth&apos;]/@src">
+          <adjuster class="url-protocol-adjuster"/>
+        </simple-field>
+        <url-pattern-field name="sourceGoodId" multiple="false" job="false" handle-unicode="false" pattern="[&amp;\?]id=(\d*)&amp;?"/>
+        <pattern-field name="catId" multiple="false" job="false" handle-unicode="false" pattern="rootCatId\&quot;:\&quot;(\d*?)\&quot;,"/>
+      </fields>
+    </writer>
+  </writers>
+</crawler>

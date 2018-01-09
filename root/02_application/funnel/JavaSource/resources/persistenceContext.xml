@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.5.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd"
+	default-lazy-init="true">
+	<!-- 物理分页执行引擎-替换ibatis默认引擎 -->
+	<bean id="sqlExecutor"
+		class="com.lenovo.lmm.framework.persistence.ibatis.PhysicsPageSqlExecutor">
+		<property name="dialect" ref="oracleDialect"></property>
+	</bean>
+	<!-- 分页方言 -->
+	<bean id="oracleDialect"
+		class="com.lenovo.lmm.framework.persistence.dialect.OracleDialect" />
+
+
+	
+	
+
+	<!-- 消息持久化事物配置-开始 -->
+	<bean id="txManagergoodsBonecp"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="goodsBonecp" />
+	</bean>
+
+	<tx:advice id="txAdvicegoodsBonecp" transaction-manager="txManagergoodsBonecp">
+		<tx:attributes>
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="*" />
+		</tx:attributes>
+	</tx:advice>
+
+	<aop:config proxy-target-class="true">
+		<aop:pointcut id="aopTransServicegoodsBonecp"
+			expression="execution(* com.lenovo.goods.service..*Service*.process(..)) || execution(* com.lenovo.goods.service..*Service*.*(..)) || execution(* com.lenovo.goods.svc..*Svc*.*Transaction(..))" />
+		<aop:advisor advice-ref="txAdvicegoodsBonecp" pointcut-ref="aopTransServicegoodsBonecp" />
+	</aop:config>
+	<!-- 消息持久化事物配置-结束 -->
+	
+</beans>

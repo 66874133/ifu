@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ant_web">
+	<!-- java源代码目录 -->
+	<property name="src.dir" location="JavaSource" />
+	<!-- 构建目录 -->
+	<property name="build.dir" location="build" />
+	<!-- class文件目录 -->
+	<property name="build.classes" location="${build.dir}/classes" />
+	<!-- 打包目录 -->
+	<property name="build.war" location="${build.dir}/war" />
+
+	<!-- tomcat根目录 -->
+	<property name="tomcat.home" location="/data/SOFTWARE/apache-tomcat-7.0.70" />
+	<!-- <property name="tomcat.lib" location="${tomcat.home}/lib" /> -->
+	<!-- web 应用的名字，也是打包后war的名字 -->
+	<property name="web.name" value="funnel" />
+	<!-- web 根目录 -->
+	<property name="web.root" value="WebContent" />
+	<property name="web.WEB-INF" location="${web.root}/WEB-INF" />
+	<property name="web.lib" location="${web.WEB-INF}/lib" />
+	<!-- 加载环境变量 -->
+	<property environment="env" />
+
+	<!-- 定义编译时的classpath -->
+	<path id="compile.path">
+		<fileset dir="${web.lib}" includes="*.jar">
+		</fileset>
+		<fileset dir="${tomcat.home}/lib">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="init" description="初始化">
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${build.classes}" />
+		<mkdir dir="${build.war}" />
+		<echo>初始化工作结束！</echo>
+	</target>
+
+	<target name="compile" depends="init" description="编译">
+		<javac destdir="build/classes" srcdir="JavaSource" includeantruntime="false" fork="true">
+			<compilerarg line="-encoding UTF-8 " />
+			<classpath refid="compile.path" />
+		</javac>
+		<echo message="编译class完成！" />
+		<copy todir="build/classes">
+		    		<fileset dir="JavaSource">
+		    		   	<exclude name="**/*.java"/>
+		    		</fileset>   
+		</copy>
+		<echo message="编译完成！" />
+	</target>
+
+
+	<target name="war" depends="compile" description="打包war文件">
+		<war destfile="${build.war}/${web.name}.war">
+			<fileset dir="${web.root}" includes="**/*.*" />
+			<lib dir="${web.lib}" />
+			<webinf dir="${web.WEB-INF}" />
+			<classes dir="${build.classes}" />
+		</war>
+		<echo>打包完成！</echo>
+	</target>
+
+	<target name="deploy" depends="war" description="发布">
+		<copy todir="/data/${web.name}/backup">
+			<fileset dir="${build.war}" includes="*.war" />
+		</copy>
+		<echo>已发布到Tomcat！</echo>
+	</target>
+
+	<target name="clean" description="清理">
+		<delete dir="${build.dir}" />
+		<delete dir="${env.tomcat_home}/webapps/${web.name}"/>
+		<delete file="/data/${web.name}/backup/${web.name}.war"/>
+		<echo>清理完成！</echo>
+	</target>
+
+
+
+</project>

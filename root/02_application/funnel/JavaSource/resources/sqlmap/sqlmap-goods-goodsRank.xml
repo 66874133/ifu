@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="GB2312"?>
+<sqlMap namespace="goodsRank">
+	<insert id="insertCurrentCategoryCodeTemp" parameterClass="java.lang.String">
+		insert into goods_rank_category_temp (category_code) values(#categoryCode#)
+	</insert>
+	<insert id="insertCurrentClassifyIdTemp" parameterClass="java.lang.String">
+		insert into goods_rank_classify_temp (classify_id) values(#classifyId#)
+	</insert>
+	<insert id="insertCurrentMallCodeTemp" parameterClass="java.lang.String">
+		insert into goods_rank_mall_temp (mall_code) values(#mallCode#)
+	</insert>
+	
+	
+	<delete id="deleteGoodsAutoRank" parameterClass="java.util.HashMap">
+         delete goods_auto_rank where rank_code=#rankCode#
+	</delete>
+	
+	<insert id="addGoodsAutoRank" parameterClass="java.util.HashMap">
+		<selectKey resultClass="java.lang.Long" keyProperty="detailId" > 
+		select S_goods_auto_rank.nextval AS detailId FROM DUAL 
+		</selectKey> 
+        insert into  goods_auto_rank 
+            (ID,goods_id,order_num,rank_code,create_date,update_date) 
+        values (#detailId#,#goodsId#,#orderNum#,#rankCode#,TO_DATE(#createDate#,'yyyy-mm-dd hh24:mi:ss'),TO_DATE(#updateDate#,'yyyy-mm-dd hh24:mi:ss'))
+
+	</insert>
+	
+	<update id="gennerRankData" parameterClass="java.util.HashMap">
+		begin  
+		  delete goods_auto_rank_his where rank_code=#rankCode# and create_date&lt;sysdate-to_number(#maxRankHisDay#);
+		  insert into goods_auto_rank_his (id,goods_id,order_num,rank_code,create_date,update_date) (select S_goods_auto_rank_his.nextval,goods_id,order_num,rank_code,create_date,update_date from goods_auto_rank where rank_code=#rankCode#);
+		  delete goods_auto_rank where rank_code=#rankCode#;
+		  insert into goods_auto_rank (id,goods_id,order_num,rank_code) 
+		  (select S_goods_auto_rank.nextval,rs.goodsid,rownum,#rankCode#
+             from (select gInfo.goods_id goodsId,rownum rn
+          from goods_info gInfo,goods_detail gd
+		<isNotEmpty property="hasClassifyCond" prepend=",">
+			 goods_classify_mapp goodsClassify
+		</isNotEmpty>
+         where gInfo.goods_id=gd.goods_id
+           and gInfo.state=1
+           and gd.is_default = 1
+           and gd.available = 1
+		<isNotEmpty property="hasMallCond" prepend="and">
+			 gInfo.source_mall_code in (select mall_code from goods_rank_mall_temp)
+		</isNotEmpty>
+		<isNotEmpty property="hasClassifyCond" prepend="and">
+			 goodsClassify.detail_id=gd.id and goodsClassify.classify_id in (select classify_id from goods_rank_classify_temp)
+		</isNotEmpty>
+		<isNotEmpty property="hasCategoryCond" prepend="and">
+			 gd.category_code in (select category_code from goods_rank_category_temp) 
+		</isNotEmpty>
+		<isNotEmpty property="priceRangBegin" prepend="and">
+			 gd.price&gt;=to_number(#priceRangBegin#)
+		</isNotEmpty>
+		<isNotEmpty property="priceRangEnd" prepend="and">
+			 gd.price&lt;to_number(#priceRangEnd#)
+		</isNotEmpty>
+           and gd.update_date&gt;=sysdate-to_number(#maxRankMaxValidDay#)
+         order by gd.update_date desc) rs
+         where rownum&lt;=to_number(#maxRankGoodsNum#));
+		end;
+	</update>
+	<select id="quereyAutoRankData" parameterClass="java.util.HashMap" resultClass="com.funnel.goods.bean.GoodsRankInfoBean">
+		select goods_id goodsId,order_num orderNum,rank_code rankCode from goods_auto_rank where rank_code=#rankCode#
+	</select>
+	<select id="quereyOperateRankData" parameterClass="java.util.HashMap" resultClass="com.funnel.goods.bean.GoodsRankInfoBean">
+		select operGoods.goods_id goodsId,order_num orderNum,rank_code rankCode from goods_operate_rank operGoods,goods_info gInfo where operGoods.goods_id=gInfo.goods_id and gInfo.state=1 and operGoods.rank_code=#rankCode#
+	</select>
+	
+	<delete id="delLastRankData" parameterClass="java.util.HashMap">
+		begin
+		 delete goods_rank_his where rank_code=#rankCode# and create_date&lt;sysdate-to_number(#maxRankHisDay#);
+		 insert into goods_rank_his(id,goods_id,order_num,rank_code) (select S_goods_rank_his.nextval,goods_id,order_num,rank_code from goods_rank where rank_code=#rankCode#);
+		 delete goods_rank where rank_code=#rankCode#;
+		end;
+	</delete>
+	<insert id="saveRankData" parameterClass="com.funnel.goods.bean.GoodsRankInfoBean">
+		insert into goods_rank (id,goods_id,order_num,rank_code) values (S_goods_rank.nextval,#goodsId#,#orderNum#,#rankCode#)
+	</insert>
+	
+	<select id="queryRankListByRankDataSourceCode" parameterClass="java.lang.String" resultClass="java.util.HashMap">
+		
+select gRank.goods_id goodsId,
+       gRank.order_number orderNum,
+       gInfo.Mobile_Url mobileUrl,
+       gInfo.Mobile_Rebate_Url mobileRebateUrl,
+       gInfo.Pc_Url pcUrl,
+       gInfo.Pc_Rebate_Url pcRebateUrl,
+       gInfo.Source_Mall_Code sourceMallCode,
+       gDetail.id goodsDetailId,
+       gDetail.source_code detailSourceCode,
+       gDetail.source_url detailSourceUrl,
+       gDetail.goods_name goodsName,
+       gDetail.Category_Code categoryCode ,
+       gDetail.Price price ,
+       gDetail.Priceunitcode priceUnitCode,
+       img.img_source_url imgSourceUrl,
+       img.img_url imgUrl,
+       to_char(gDetail.Update_Date,'yyyy-mm-dd hh24:mi:ss') updateDate
+  from $rankDataSourceCode$  gRank,
+       goods_info            gInfo,
+       goods_detail          gDetail,
+       goods_image_resources imgRes,
+       goods_image           img
+ where gRank.goods_id = gInfo.goods_id
+   and gRank.goods_id = gDetail.goods_id
+   and gDetail.Is_Default = 1
+   and gDetail.Available = 1
+   and gInfo.State = 1
+   and gDetail.Img_Res_Id = imgRes.id
+   and imgRes.Img_Id = img.id
+   and imgRes.Available = 1
+   and img.available = 1
+ order by gRank.order_number
+	</select>
+	
+	<select id="queryRankCode" parameterClass="java.util.HashMap" resultClass="com.funnel.goods.cache.goodsRank.GoodsRankConfInfo">
+		select rank_code code,rank_desc label
+  		from goods_rank_conf
+   		where AVAILABLE = 1
+		<isNotEmpty property="rankType" prepend="and">
+			 type = #rankType#
+		</isNotEmpty>
+	</select>
+	<select id="queryRankDataSourceCode" resultClass="com.funnel.goods.cache.goodsRank.GoodsRankConfInfo">
+		select rank_data_source_code code,rank_desc label
+  		from goods_rank_conf
+   		where AVAILABLE = 1
+		<isNotEmpty property="rankType" prepend="and">
+			 type = #rankType#
+		</isNotEmpty>
+	</select>
+	
+	<select id="queryGoodsOperateRank" parameterClass="java.util.HashMap"
+		resultClass="java.util.HashMap">
+    select
+        operateRank.id id,
+        gInfo.State state,
+        gInfo.goods_id goodsId,
+        gInfo.Mobile_Url mobileUrl,
+        gInfo.Mobile_Rebate_Url mobileRebateUrl,
+        gInfo.Pc_Url pcUrl,
+        gInfo.Pc_Rebate_Url pcRebateUrl,
+        gInfo.Source_Mall_Code sourceMallCode,
+        gDetail.goods_name goodsName,
+        gDetail.source_url detailSourceUrl,
+        gDetail.Category_Code categoryCode ,
+        GOODS_CLASS.NAME categoryName,
+        gDetail.Price price ,
+        gDetail.Priceunitcode priceUnitCode,
+        img.img_url imgUrl,
+        operateRank.order_num orderNum,
+        operateRank.rank_code rankCode,
+        to_char(operateRank.Update_Date,'yyyy-mm-dd hh24:mi:ss') updateDate,
+        rankConf.rank_desc rankDesc
+    from 
+        goods_info gInfo,
+        goods_detail gDetail,
+        goods_image_resources imgRes,
+        goods_image img,
+        GOODS_CLASS,
+        goods_operate_rank operateRank,
+        goods_rank_conf rankConf
+    where 
+        gInfo.goods_id = gDetail.goods_id
+        and operateRank.goods_id = gInfo.goods_id
+        and gDetail.Is_Default = 1
+        and gDetail.Available = 1
+        and gDetail.Img_Res_Id = imgRes.id
+        and imgRes.Img_Id = img.id
+        and imgRes.Available = 1
+        and img.available = 1
+        and gDetail.cid = GOODS_CLASS.cid
+        and rankConf.rank_code = operateRank.rank_code
+        and rankConf.AVAILABLE = 1
+		<isNotEmpty property="rankCode" prepend="and">
+			operateRank.rank_code = #rankCode#
+		</isNotEmpty>
+		<isNotEmpty property="state" prepend="and">
+			gInfo.State = to_number(#state#)
+		</isNotEmpty>
+		<isNotEmpty property="goodsName" prepend="and">
+			gDetail.goods_name like '%'||#goodsName#||'%'
+		</isNotEmpty>
+		<isNotEmpty property="goodsId" prepend="and">
+			gInfo.goods_id = to_number(#goodsId#)
+		</isNotEmpty>
+		<isNotEmpty property="updateDateStart" prepend="and">
+		<![CDATA[
+			operateRank.Update_Date >= TO_DATE(#updateDateStart#,'yyyy-mm-dd')
+		]]>
+		</isNotEmpty>
+		<isNotEmpty property="updateDateEnd" prepend="and">
+		<![CDATA[
+			operateRank.Update_Date <= TO_DATE(concat(#updateDateEnd#,' 23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+		]]>
+		</isNotEmpty>
+		<isNotEmpty property="rankCode">
+			order by operateRank.order_Num
+		</isNotEmpty>
+		<isEmpty property="rankCode">
+			order by operateRank.Update_Date
+		</isEmpty>
+	
+	</select>
+	
+	<insert id="insertGoodsOperateRank" parameterClass="java.util.HashMap">
+		insert into goods_operate_rank (id,goods_id,order_num,rank_code) 
+		values
+		(s_GOODS_OPERATE_RANK.nextval,#goodsId#,#orderNum#,#rankCode#)
+	</insert>
+	
+	<select id="countGoodsInGoodsOperateRankByIdAndRankCode" parameterClass="java.util.HashMap"
+		resultClass="java.lang.Integer">
+		select count(*) from goods_operate_rank where goods_id=to_number(#goodsId#) and rank_code = #rankCode#
+	</select>
+	
+	<delete id="delGoodsOperateRankById" parameterClass="java.lang.String">
+		 delete goods_operate_rank where id=to_number(#id#)
+	</delete>
+	
+	<select id="getGoodsCountByRankDataSourceCode" parameterClass="java.lang.String"
+		resultClass="java.lang.Integer">
+		select count(*) from $rankDataSourceCode$ where available = 1
+	</select>
+	
+	
+	<select id="queryRankListByRankCode" parameterClass="java.lang.String" resultClass="java.util.HashMap">
+		
+select gRank.goods_id goodsId,
+       gRank.order_number orderNum,
+       gInfo.Mobile_Url mobileUrl,
+       gInfo.Mobile_Rebate_Url mobileRebateUrl,
+       gInfo.Pc_Url pcUrl,
+       gInfo.Pc_Rebate_Url pcRebateUrl,
+       gInfo.Source_Mall_Code sourceMallCode,
+       gDetail.id goodsDetailId,
+       gDetail.source_code detailSourceCode,
+       gDetail.source_url detailSourceUrl,
+       gDetail.goods_name goodsName,
+       gDetail.Category_Code categoryCode ,
+       gDetail.Price price ,
+       gDetail.Priceunitcode priceUnitCode,
+       img.img_source_url imgSourceUrl,
+       img.img_url imgUrl,
+       to_char(gDetail.Update_Date,'yyyy-mm-dd hh24:mi:ss') updateDate
+  from (SELECT goods_id, order_num order_number
+     FROM goods_rank
+    WHERE rank_code = #rankCode#) gRank,
+       goods_info            gInfo,
+       goods_detail          gDetail,
+       goods_image_resources imgRes,
+       goods_image           img
+ where gRank.goods_id = gInfo.goods_id
+   and gRank.goods_id = gDetail.goods_id
+   and gDetail.Is_Default = 1
+   and gDetail.Available = 1
+   and gInfo.State = 1
+   and gDetail.Img_Res_Id = imgRes.id
+   and imgRes.Img_Id = img.id
+   and imgRes.Available = 1
+   and img.available = 1
+ order by gRank.order_number
+	</select>
+	
+	<delete id="deleteRankDataListByRankCode" parameterClass="java.lang.String">
+         delete goods_rank where rank_code=#rankCode#
+	</delete>
+	
+
+</sqlMap>
