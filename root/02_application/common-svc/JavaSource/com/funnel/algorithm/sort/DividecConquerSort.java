@@ -1,5 +1,8 @@
 package com.funnel.algorithm.sort;
 
+/**
+ * 归并排序
+ */
 public class DividecConquerSort {
 
 	public static void merge(int[] a, int low, int mid, int high) {// 对两组已经排序的数组进行合并
